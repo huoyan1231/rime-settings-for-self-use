@@ -1,0 +1,28 @@
+customization:
+  distribution_code_name: Weasel
+  distribution_version: 0.17.4
+  generator: "Rime::SwitcherSettings"
+  modified_time: "Tue Aug 19 20:43:22 2025"
+  rime_version: 1.13.1
+key_binder:
+  bindings:
+    - {accept: "Control+Shift+E", toggle: emoji_suggestion, when: always}
+    - {accept: "Control+Shift+1", toggle: simplification, when: has_menu}
+    - {accept: bracketleft, send: Page_Up, when: paging}
+    - {accept: bracketright, send: Page_Down, when: has_menu}
+patch:
+  __include: "code_limit:/patch"
+  "easy_en/enable_sentence": false
+  "key_binder/bindings/@next":
+    accept: KP_Enter
+    send: Return
+    when: composing
+  schema_list:
+    - {schema: rime_mint}
+    - {schema: terra_pinyin}
+    - {schema: melt_eng}
+  "speller/algebra":
+    - "derive/^([nl])ue$/$1ve/"
+    - "derive/^([jqxy])u/$1v/"
+    - "abbrev/^(.).+$/$1/"
+    - "derive/^([nl])ve/$1ue/"
