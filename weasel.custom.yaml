@@ -5,4 +5,5 @@ customization:
   modified_time: "Tue Aug 19 20:44:08 2025"
   rime_version: 1.13.1
 patch:
+  __include: "hot_keys:/patch"
   "style/color_scheme": ps4
