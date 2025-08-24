@@ -9,13 +9,6 @@ patch:
   "translator/max_homographs": 7
   "speller/algebra/+":
     - derive/v/u/ # u => ü
-  key_binder:
-    # 以词定字
-    select_first_character: "minus" # 使用 - 
-    select_last_character: "equal"  # 使用 =
-    bindings:
-      - {accept: bracketleft, send: Page_Up, when: paging}      # 使用`[`进行向上翻页（第一页时候无效）
-      - {accept: bracketright, send: Page_Down, when: has_menu} # 使用`]`进行向下翻页
   speller:
     algebra:
       - erase/^xx$/ # 首选保留
