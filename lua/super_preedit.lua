@@ -1,8 +1,22 @@
--- 复制自<万象拼音方案> https://github.com/amzxyz/rime_wanxiang
--- @author: amzxyz
--- @modify: Mintimate
--- 修改内容: ① 兼容纠错
+-- 欢迎使用万象拼音方案
+-- @amzxyz
+-- https://github.com/amzxyz/rime_wanxiang
+local tone_map = {
+    ['ā']='a', ['á']='a', ['ǎ']='a', ['à']='a',
+    ['ē']='e', ['é']='e', ['ě']='e', ['è']='e',
+    ['ī']='i', ['í']='i', ['ǐ']='i', ['ì']='i',
+    ['ō']='o', ['ó']='o', ['ǒ']='o', ['ò']='o',
+    ['ū']='u', ['ú']='u', ['ǔ']='u', ['ù']='u',
+    ['ǖ']='ü', ['ǘ']='ü', ['ǚ']='ü', ['ǜ']='ü',
+}
 
+local function remove_pinyin_tone(s)
+  local result = {}
+  for uchar in s:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    table.insert(result, tone_map[uchar] or uchar)
+  end
+  return table.concat(result)
+end
 local function modify_preedit_filter(input, env)
     local config = env.engine.schema.config
     local delimiter = config:get_string('speller/delimiter') or " '"
@@ -15,35 +29,43 @@ local function modify_preedit_filter(input, env)
     local tone_isolate = config:get_bool("speller/tone_isolate")      -- 是否将数字声调从转换后拼音中隔离出来
     local visual_delim = config:get_string("speller/visual_delimiter") or " "  -- 定义转换后的分隔符号
 
-    env.settings = { tone_display = env.engine.context:get_option("tone_display") } or false
+    env.settings = {
+        tone_display = env.engine.context:get_option("tone_display") or false,
+        full_pinyin  = env.engine.context:get_option("full_pinyin") or false,
+      }
     local auto_delimiter = delimiter:sub(1, 1)
     local manual_delimiter = delimiter:sub(2, 2)
 
     local is_tone_display = env.settings.tone_display
+    local is_full_pinyin = env.settings.full_pinyin
     local context = env.engine.context
 
     local seg = context.composition:back()
-    env.is_special_tag_mode = seg and (
-        seg:has_tag("radical_lookup") or seg:has_tag("reverse_stroke") or seg:has_tag("correntor")
+    env.is_radical_mode = seg and (
+        seg:has_tag("wanxiang_reverse")
     ) or false
 
     for cand in input:iter() do
-        local genuine_cand = cand:get_genuine()
-        local preedit = genuine_cand.preedit or ""
-        local comment = genuine_cand.comment
-
-        if env.is_special_tag_mode then
-            -- 2025-07-10 Mintimate 使其兼容纠错
-            genuine_cand.preedit = comment:gsub("[%[%]]", "")
-            yield(genuine_cand)
-            goto continue
-        end
-
-        if not comment or comment == "" or not is_tone_display then
+        if env.is_radical_mode then
             yield(cand)
             goto continue
         end
 
+        local genuine_cand = cand:get_genuine()
+        local preedit = genuine_cand.preedit or ""
+        local comment = genuine_cand.comment
+
+        -- 如果两个开关都没开，则直接跳过（默认不处理）
+        if not is_tone_display and not is_full_pinyin then
+            yield(cand)
+            goto continue
+        end
+
+        -- 如果 comment 为空
+        if (not comment or comment == "") then
+            yield(cand)
+            goto continue
+        end
         -- 拆分 preedit
         local input_parts = {}
         local current_segment = ""
@@ -77,7 +99,7 @@ local function modify_preedit_filter(input, env)
             if part == auto_delimiter or part == manual_delimiter then
                 input_parts[i] = visual_delim
             else
-                local body, tone = part:match("(%a+)(%d?)")
+                local body, tone = part:match("([%a]+)([^%a]+)") --后面加号很必要
                 local py = pinyin_segments[pinyin_index]
 
                 if py then
@@ -107,6 +129,14 @@ local function modify_preedit_filter(input, env)
                 end
             end
         end
+        --genuine_cand.preedit = table.concat(input_parts)
+        --yield(genuine_cand)
+        if env.settings.full_pinyin then
+            for idx, part in ipairs(input_parts) do
+                input_parts[idx] = remove_pinyin_tone(part)
+            end
+        end
+        
         genuine_cand.preedit = table.concat(input_parts)
         yield(genuine_cand)
         ::continue::

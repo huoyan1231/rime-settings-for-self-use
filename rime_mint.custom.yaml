@@ -1,57 +1,113 @@
 patch:
-  "style/layout/hilite_padding_x": 5
-  "style/layout/hilite_spacing": 10
-  "style/hover_type": none
-  "style/layout/hilite_padding": 5
-  "style/layout/min_height": 0
-  "style/candidate_abbreviate_length": 0
-  "schema/half_icon": "icons/half.ico"
-  "style/comment_font_point": 14
-  "style/layout/corner_radius": 8
-  "style/layout/shadow_radius": 8
-  "style/label_format": "%s."
-  "show_notifications_time": 1400
-  "style/mark_text": ""
-  "style/display_tray_icon": false
-  "style/layout/border": 1
-  "style/vertical_text_with_wrap": false
-  "style/inline_preedit": false
-  "style/label_font_point": 14
-  "style/comment_font_face": "微软雅黑"
-  "style/font_face": "微软雅黑"
-  "global_ascii": false
-  "style/color_scheme": "ink"
-  "style/layout/max_height": 2800
-  "show_notifications": true
-  "style/ascii_tip_follow_cursor": true
-  "style/layout/shadow_offset_x": "-8"
-  "style/enhanced_position": true
-  "style/layout/min_width": 80
-  "style/layout/border_width": 1
-  "schema/full_icon": "icons/full.ico"
-  "style/layout/hilite_padding_y": 5
-  "style/vertical_auto_reverse": false
-  "style/layout/max_width": 2800
-  "schema/ascii_icon": "icons/en.ico"
-  "style/antialias_mode": default
-  "style/layout/round_corner": 8
-  "style/paging_on_scroll": false
-  "style/label_font_face": "微软雅黑"
-  "style/mouse_hover_ms": 0
-  "style/layout/margin_x": 12
-  "schema/icon": "icons/zh.ico"
-  "style/vertical_text_left_to_right": true
-  "style/fullscreen": false
-  "style/layout/margin_y": 12
-  "style/click_to_capture": false
-  "style/layout/type": vertical
-  "style/font_point": 14
-  "style/preedit_type": composition
-  "style/horizontal": true
-  "style/layout/spacing": 18
-  "style/layout/candidate_spacing": 15
-  "style/vertical_text": true
-  "style/layout/shadow_offset_y": 8
-  "menu/alternative_select_labels": [1,2,3,4,5,6,7,8,9,]
-  "style/layout/align_type": center
-  "style/color_scheme_dark": "ink"
+  # 语言模型
+  "grammar/language": wanxiang-lts-zh-hans
+  "grammar/collocation_max_length": 5
+  "grammar/collocation_min_length": 2
+  # translator 内加载
+  "translator/contextual_suggestions": true
+  "translator/max_homophones": 7
+  "translator/max_homographs": 7
+  "speller/algebra/+":
+    - derive/v/u/ # u => ü
+  key_binder:
+    # 以词定字
+    select_first_character: "minus" # 使用 - 
+    select_last_character: "equal"  # 使用 =
+    bindings:
+      - {accept: bracketleft, send: Page_Up, when: paging}      # 使用`[`进行向上翻页（第一页时候无效）
+      - {accept: bracketright, send: Page_Down, when: has_menu} # 使用`]`进行向下翻页
+  speller:
+    algebra:
+      - erase/^xx$/ # 首选保留
+      - derive/^([zcs])h/$1/ # zh, ch, sh => z, c, s
+      - derive/^([zcs])([^h])/$1h$2/ # z, c, s => zh, ch, sh
+      - derive/([aei])n$/$1ng/ # en => eng, in => ing
+      - derive/([aei])ng$/$1n/ # eng => en, ing => in
+      - derive/([iu])an$/$lan/ # ian => iang, uan => uang
+      - derive/([iu])ang$/$lan/ # iang => ian, uang => uan
+      - derive/([aeiou])ng$/$1gn/        # dagn => dang
+      - derive/([dtngkhrzcs])o(u|ng)$/$1o/  # zho => zhong|zhou
+      - derive/ong$/on/                  # zhonguo => zhong guo
+      - derive/ao$/oa/                   # hoa => hao
+      - derive/([iu])a(o|ng?)$/a$1$2/    # tain => tian
+      - abbrev/^([a-z]).+$/$1/ #简拼（首字母）
+      - abbrev/^([zcs]h).+$/$1/ #简拼（zh, ch, sh）     
+      # 建议保留内容
+      - abbrev/^([a-z]).+$/$1/ #简拼（首字母）
+      - abbrev/^([zcs]h).+$/$1/ #简拼（zh, ch, sh）
+       ### 自动纠错
+       # 有些规则对全拼简拼混输有副作用：如「x'ai 喜爱」被纠错为「xia 下」
+       # zh、ch、sh
+       - derive/([zcs])h(a|e|i|u|ai|ei|an|en|ou|uo|ua|un|ui|uan|uai|uang|ang|eng|ong)$/h$1$2/  # hzi → zhi
+       - derive/([zcs])h([aeiu])$/$1$2h/  # zih → zhi
+       # ai
+       - derive/^([wghk])ai$/$1ia/  # wia → wai
+       # ia
+       - derive/([qjx])ia$/$1ai/  # qai → qia
+       # ei
+       - derive/([wtfghkz])ei$/$1ie/
+       # ie
+       - derive/([jqx])ie$/$1ei/
+       # ao
+       - derive/([rtypsdghklzcbnm])ao$/$1oa/
+       # ou
+       - derive/([ypfm])ou$/$1uo/
+       # uo（无）
+       # an
+       - derive/([wrtypsdfghklzcbnm])an$/$1na/
+       # en
+       - derive/([wrpsdfghklzcbnm])en$/$1ne/
+       # ang
+       - derive/([wrtypsdfghklzcbnm])ang$/$1nag/
+       - derive/([wrtypsdfghklzcbnm])ang$/$1agn/
+       # eng
+       - derive/([wrtpsdfghklzcbnm])eng$/$1neg/
+       - derive/([wrtpsdfghklzcbnm])eng$/$1egn/
+       # ing
+       - derive/([qtypdjlxbnm])ing$/$1nig/
+       - derive/([qtypdjlxbnm])ing$/$1ign/
+       # ong
+       - derive/([rtysdghklzcn])ong$/$1nog/
+       - derive/([rtysdghklzcn])ong$/$1ogn/
+       # iao
+       - derive/([qtpdjlxbnm])iao$/$1ioa/
+       - derive/([qtpdjlxbnm])iao$/$1oia/
+       # ui
+       - derive/([rtsghkzc])ui$/$1iu/
+       # iu
+       - derive/([qjlxnm])iu$/$1ui/
+       # ian
+       - derive/([qtpdjlxbnm])ian$/$1ain/
+       # - derive/([qtpdjlxbnm])ian$/$1ina/ # 和「李娜、蒂娜、缉拿」等常用词有冲突
+       # in
+       - derive/([qypjlxbnm])in$/$1ni/
+       # iang
+       - derive/([qjlxn])iang$/$1aing/
+       - derive/([qjlxn])iang$/$1inag/
+       # ua
+       - derive/([g|k|h|zh|sh])ua$/$1au/
+       # uai
+       - derive/([g|h|k|zh|ch|sh])uai$/$1aui/
+       - derive/([g|h|k|zh|ch|sh])uai$/$1uia/
+       # uan
+       - derive/([qrtysdghjklzxcn])uan$/$1aun/
+       # - derive/([qrtysdghjklzxcn])uan$/$1una/ # 和「去哪、露娜」等常用词有冲突
+       # un
+       - derive/([qrtysdghjklzxc])un$/$1nu/
+       # ue
+       - derive/([nlyjqx])ue$/$1eu/
+       # uang
+       - derive/([g|h|k|zh|ch|sh])uang$/$1aung/
+       - derive/([g|h|k|zh|ch|sh])uang$/$1uagn/
+       - derive/([g|h|k|zh|ch|sh])uang$/$1unag/
+       - derive/([g|h|k|zh|ch|sh])uang$/$1augn/
+       # iong
+       - derive/([jqx])iong$/$1inog/
+       - derive/([jqx])iong$/$1oing/
+       - derive/([jqx])iong$/$1iogn/
+       - derive/([jqx])iong$/$1oign/
+       # 其他
+       - derive/([rtsdghkzc])o(u|ng)$/$1o/ # do → dou|dong
+       - derive/ong$/on/ # lon → long
+       - derive/([tl])eng$/$1en/ # ten → teng
+       - derive/([qwrtypsdfghjklzxcbnm])([aeio])ng$/$1ng/ # lng → lang、leng、ling、long     
