@@ -1,2 +1,6 @@
 var:
-  last_build_time: 1756059805
+  last_build_time: 1756137733
+  previously_selected_schema: wanxiang
+  schema_access_time:
+    rime_mint: 1756137514
+    wanxiang: 1756137567
