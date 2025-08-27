@@ -327,8 +327,8 @@ key_binder:
   # Lua 配置: 超级tips上屏按键
   tips_key: "period"   #修改时候去default找
   # Lua 配置: 以词定字（上屏当前词句的第一个或最后一个字），和中括号翻页有冲突
-  select_first_character: "bracketleft"  # 左中括号 [
-  select_last_character: "bracketright"  # 右中括号 ]
+  select_first_character: "minus"  # 左中括号 [
+  select_last_character: "equal"  # 右中括号 ]
   search: "`"             # 辅码引导符，要添加到 speller/alphabet
   bindings:               # 也可以再增加方案专有的
 #- { when: composing, accept: Tab, send: '[' } ## 取消注释后：tab引导辅助码
@@ -365,11 +365,11 @@ key_binder:
     # - { when: paging, accept: comma, send: Page_Up }
     # - { when: has_menu, accept: period, send: Page_Down }
 #② 翻页 [ ]
-    # - { when: paging, accept: bracketleft, send: Page_Up }
-    # - { when: has_menu, accept: bracketright, send: Page_Down }
+    - { when: paging, accept: bracketleft, send: Page_Up }
+    - { when: has_menu, accept: bracketright, send: Page_Down }
 #③ 翻页 - =
-    - { when: has_menu, accept: minus, send: Page_Up }
-    - { when: has_menu, accept: equal, send: Page_Down }
+    # - { when: has_menu, accept: minus, send: Page_Up }
+    # - { when: has_menu, accept: equal, send: Page_Down }
 # Option/Alt + ←/→ 切换光标至下/上一个拼音
     - { when: composing, accept: Alt+Left, send: Shift+Left }
     - { when: composing, accept: Alt+Right, send: Shift+Right }
@@ -443,6 +443,7 @@ speller:
     - xform/^n(\d)/en$1/
     - derive/([nl])ve(\d)/$1ue$2/                            #让üè兼容ue
     - derive/^([jqx])v(\d)$/$1u$2/
+    - derive/^([jqx])u(\d)$/$1v$2/
     - abbrev/^([zcs]h).+$/$1/                        #zh ch sh作为整体
     - abbrev/^([zcs]h).+(\d)$/$1$2/                  #zh ch sh作为整体
     - abbrev/^([qwrtypsdfghjklzxcbnm]).+$/$1/        #不携带元音的声母派生出首字母简码来
@@ -721,6 +722,7 @@ speller:
     - xform/ui(\d)$/Ⓥ$1/
     - xform/in(\d)$/Ⓑ$1/
     - xlit/ⓆⓌⓇⓉⓎⓊⒾⓄⓅⓈⒹⒻⒼⒽⒿⓀⓁⓏⓍⒸⓋⒷⓃⓂ/qwrtyuiopsdfghjklzxcvbnm/
+    - xform/^(aj|ac|ad|ew|ef|oz)(\d?)$//
     - derive/^(..)(\d)$/$1/
     - derive/^(.).+(\d)$/$1$2/
     #- abbrev/^([a-z]).+$/$1/   #简拼
